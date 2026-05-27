@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="background-shapes">
         <div class="shape shape-1"></div>
@@ -18,7 +20,7 @@
     <main class="container">
         <div class="glass-card" id="main-card">
             <div class="header">
-                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/6/63/Polytechnic_University_of_the_Philippines_Bi%C3%B1an_Logo.png/220px-Polytechnic_University_of_the_Philippines_Bi%C3%B1an_Logo.png" alt="PUP Logo" class="logo">
+                <img src="https://tine-kw.github.io/pup-shms-verify/images/pup_logo.png" alt="PUP Logo" class="logo">
                 <h1>Certificate Verification</h1>
                 <p>Polytechnic University of the Philippines</p>
             </div>
@@ -30,11 +32,15 @@
 
             <div id="result-valid" class="state-container hidden">
                 <div class="icon-success">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
                 </div>
                 <h2 class="success-text">Verified Authentic</h2>
                 <p class="subtitle">This certificate is an official document issued by the PUP Honor System.</p>
-                
+
                 <div class="details-grid">
                     <div class="detail-item">
                         <span class="detail-label">Certificate ID</span>
@@ -65,7 +71,12 @@
 
             <div id="result-invalid" class="state-container hidden">
                 <div class="icon-error">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
                 </div>
                 <h2 class="error-text">Verification Failed</h2>
                 <p>We could not find a valid certificate matching the provided ID.</p>
@@ -74,7 +85,7 @@
                     <p>Please ensure you scanned a legitimate PUP Honor System QR Code.</p>
                 </div>
             </div>
-            
+
             <div id="manual-input" class="state-container hidden">
                 <h2>Manual Verification</h2>
                 <p>Enter a Certificate ID below to verify its authenticity.</p>
@@ -92,4 +103,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>
