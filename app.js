@@ -88,9 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // 2. Fallback: If not in explicitly saved awards, we can check if the ID 
-            // matches a known format (CERT-YYYY-0000X) and attempt to find the student
-            if (id.startsWith('CERT-')) {
-                const middlePart = id.substring(5); // e.g. 2025-00001
+            // matches a known format (PUP-PL-YYYY-XXXX, PUP-DL-YYYY-XXXX, or CERT-YYYY-XXXX)
+            if (id.startsWith('CERT-') || id.startsWith('PUP-PL-') || id.startsWith('PUP-DL-')) {
+                const parts = id.split('-');
+                const studentIdMiddle = parts[parts.length - 1]; // e.g. "00001"
                 
                 const studentsRes = await fetch(`${API_URL}/students`);
                 const students = await studentsRes.json();
@@ -99,20 +100,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (const s of students) {
                     let sMiddle = s.studentId;
                     if (sMiddle && sMiddle.includes('-')) {
-                        const parts = sMiddle.split('-');
-                        if (parts.length >= 2) sMiddle = parts[1]; // e.g., 2025-00001-MN-0 -> 00001 or similar based on backend schema
+                        const sParts = sMiddle.split('-');
+                        if (sParts.length >= 2) sMiddle = sParts[1]; 
                     }
-                    if (middlePart === sMiddle || s.studentId.includes(middlePart)) {
+                    if (studentIdMiddle === sMiddle || s.studentId.includes(studentIdMiddle)) {
                         matchedStudent = s;
                         break;
                     }
                 }
 
                 if (matchedStudent) {
-                    // For dummy frontend, if we found the student matching the CERT ID pattern,
-                    // we show valid. (In real app, we compute grades here, but that's heavy for frontend).
+                    let awardName = id.startsWith('PUP-PL-') ? "President's Lister" : 
+                                    id.startsWith('PUP-DL-') ? "Dean's Lister" : "Honor Award";
+                    
                     displayValid(id, {
-                        awardType: "President's Lister / Dean's Lister",
+                        awardType: awardName,
                         periodEarned: "1st Semester 2025-2026"
                     }, matchedStudent);
                     return;
