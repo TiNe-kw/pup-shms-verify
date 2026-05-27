@@ -75,13 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!awardsRes.ok) throw new Error('Failed to fetch awards');
             const awards = await awardsRes.json();
 
-            const award = awards.find(a => a.certificateId === id);
+            const award = awards.find(a => a.certificate_id === id);
 
             if (award) {
                 // Fetch student details to get name and program
                 const studentsRes = await fetch(`${API_URL}/students`);
                 const students = await studentsRes.json();
-                const student = students.find(s => s.studentId === award.studentId);
+                const student = students.find(s => s.student_id === award.student_id);
 
                 displayValid(id, award, student);
                 return;
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Get all unique periods for each student
                 for (const student of students) {
-                    const studentGrades = grades.filter(g => g.studentId === student.studentId);
+                    const studentGrades = grades.filter(g => g.student_id === student.student_id);
                     const periods = [...new Set(studentGrades.map(g => g.period))];
 
                     for (const period of periods) {
@@ -151,11 +151,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayValid(id, award, student) {
         elCertId.textContent = id;
-        elName.textContent = student ? student.fullName : 'Unknown Student';
-        elStudentId.textContent = student ? student.studentId : award.studentId || '-';
-        elAward.textContent = award.awardType;
-        elProgram.textContent = student ? resolveProgramName(student.programId) : 'Unknown Program';
-        elPeriod.textContent = award.periodEarned;
+        elName.textContent = student ? student.full_name : 'Unknown Student';
+        elStudentId.textContent = student ? student.student_id : award.student_id || '-';
+        elAward.textContent = award.award_type;
+        elProgram.textContent = student ? resolveProgramName(student.program_id) : 'Unknown Program';
+        elPeriod.textContent = award.period_earned;
 
         showState(stateValid);
     }
