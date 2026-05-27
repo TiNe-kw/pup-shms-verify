@@ -27,6 +27,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // But ?id= is easiest for static hosting
     let certId = urlParams.get('id');
 
+    // If no query parameter, check pathname for /verify/CERT-ID
+    if (!certId) {
+        const pathParts = window.location.pathname.split('/');
+        const lastPart = pathParts[pathParts.length - 1];
+        if (lastPart && (lastPart.startsWith('CERT-') || lastPart.startsWith('PUP-'))) {
+            certId = lastPart;
+        }
+    }
+
     if (certId) {
         verifyCertificate(certId);
     } else {
@@ -35,7 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     btnVerify.addEventListener('click', () => {
-        const id = manualInput.value.trim();
+        let id = manualInput.value.trim();
+        // If user pastes full URL from QR code, extract the ID
+        if (id.includes('/verify/')) {
+            id = id.split('/verify/').pop();
+        } else if (id.includes('?id=')) {
+            id = id.split('?id=').pop();
+        }
+        
         if (id) {
             verifyCertificate(id);
         }
@@ -118,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const periods = [...new Set(studentGrades.map(g => g.period))];
 
                     for (const period of periods) {
-                        const hash = Math.abs(javaHashCode(student.studentId + period)) % 100000;
+                        const hash = Math.abs(javaHashCode(student.student_id + period)) % 100000;
                         if (hash === expectedHash) {
                             matchedStudent = student;
                             matchedPeriod = period;
