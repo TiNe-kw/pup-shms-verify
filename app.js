@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const stateValid = document.getElementById('result-valid');
     const stateInvalid = document.getElementById('result-invalid');
     const stateManual = document.getElementById('manual-input');
-    
+
     // Details Elements
     const elCertId = document.getElementById('val-cert-id');
     const elName = document.getElementById('val-name');
@@ -12,9 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const elAward = document.getElementById('val-award');
     const elProgram = document.getElementById('val-program');
     const elPeriod = document.getElementById('val-period');
-    
+
     const elInvalidCertId = document.getElementById('invalid-cert-id');
-    
+
     // Manual Input Elements
     const manualInput = document.getElementById('manual-cert-id');
     const btnVerify = document.getElementById('btn-verify');
@@ -67,55 +67,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function verifyCertificate(id) {
         showState(stateLoading);
-        
+
         try {
             // 1. Fetch all awards (Since the backend doesn't support complex querying easily, 
             // and dataset is small, we fetch all to find the match)
             const awardsRes = await fetch(`${API_URL}/awards`);
             if (!awardsRes.ok) throw new Error('Failed to fetch awards');
             const awards = await awardsRes.json();
-            
+
             const award = awards.find(a => a.certificateId === id);
-            
+
             if (award) {
                 // Fetch student details to get name and program
                 const studentsRes = await fetch(`${API_URL}/students`);
                 const students = await studentsRes.json();
                 const student = students.find(s => s.studentId === award.studentId);
-                
+
                 displayValid(id, award, student);
                 return;
             }
 
-            // 2. Fallback: If not in explicitly saved awards, we can check if the ID 
-            // matches a known format (PUP-PL-YYYY-XXXX, PUP-DL-YYYY-XXXX, or CERT-YYYY-XXXX)
+            // 2. Fallback: Dynamic synthetic awards check via deterministic hash
             if (id.startsWith('CERT-') || id.startsWith('PUP-PL-') || id.startsWith('PUP-DL-')) {
                 const parts = id.split('-');
-                const studentIdMiddle = parts[parts.length - 1]; // e.g. "00001"
-                
+                const expectedHashStr = parts[parts.length - 1]; // e.g. "72300"
+                const expectedHash = parseInt(expectedHashStr, 10);
+
                 const studentsRes = await fetch(`${API_URL}/students`);
                 const students = await studentsRes.json();
-                
+
+                const gradesRes = await fetch(`${API_URL}/grades`);
+                const grades = await gradesRes.json();
+
+                // Group grades by student and period to find all possible studentId + period combinations
                 let matchedStudent = null;
-                for (const s of students) {
-                    let sMiddle = s.studentId;
-                    if (sMiddle && sMiddle.includes('-')) {
-                        const sParts = sMiddle.split('-');
-                        if (sParts.length >= 2) sMiddle = sParts[1]; 
+                let matchedPeriod = null;
+
+                function javaHashCode(str) {
+                    let hash = 0;
+                    for (let i = 0; i < str.length; i++) {
+                        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                        hash = hash & hash; // Convert to 32bit integer
                     }
-                    if (studentIdMiddle === sMiddle || s.studentId.includes(studentIdMiddle)) {
-                        matchedStudent = s;
-                        break;
+                    return hash;
+                }
+
+                // Get all unique periods for each student
+                for (const student of students) {
+                    const studentGrades = grades.filter(g => g.studentId === student.studentId);
+                    const periods = [...new Set(studentGrades.map(g => g.period))];
+
+                    for (const period of periods) {
+                        const hash = Math.abs(javaHashCode(student.studentId + period)) % 100000;
+                        if (hash === expectedHash) {
+                            matchedStudent = student;
+                            matchedPeriod = period;
+                            break;
+                        }
                     }
+                    if (matchedStudent) break;
                 }
 
                 if (matchedStudent) {
-                    let awardName = id.startsWith('PUP-PL-') ? "President's Lister" : 
-                                    id.startsWith('PUP-DL-') ? "Dean's Lister" : "Honor Award";
-                    
+                    let awardName = id.startsWith('PUP-PL-') ? "President's Lister" :
+                        id.startsWith('PUP-DL-') ? "Dean's Lister" : "Honor Award";
+
                     displayValid(id, {
                         awardType: awardName,
-                        periodEarned: "1st Semester 2025-2026"
+                        periodEarned: matchedPeriod || "1st Semester 2025-2026"
                     }, matchedStudent);
                     return;
                 }
@@ -137,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elAward.textContent = award.awardType;
         elProgram.textContent = student ? resolveProgramName(student.programId) : 'Unknown Program';
         elPeriod.textContent = award.periodEarned;
-        
+
         showState(stateValid);
     }
 
