@@ -168,7 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayValid(id, award, student) {
         elCertId.textContent = id;
         elName.textContent = student ? student.first_name + ' ' + student.last_name : 'Unknown Student';
-        elStudentId.textContent = student ? student.student_id : award.student_id || '-';
         elAward.textContent = award.award_type;
         elProgram.textContent = student ? resolveProgramName(student.program_id) : 'Unknown Program';
         elPeriod.textContent = award.period_earned;
